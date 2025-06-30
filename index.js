@@ -14,12 +14,9 @@ import layoutRoutes from "./routes/layoutRoutes.js";
 
 import { startBookingCompletionJob } from "./cron/completeBookingJob.js";
 
-const allowedOrigins = [
-  "http://127.0.0.1:5173", // dev
-  "https://coworking-client.vercel.app", // prod
-];
-
 dotenv.config();
+
+const allowedOrigin = process.env.ALLOWED_ORIGIN;
 
 const app = express();
 connectDB();
@@ -27,12 +24,13 @@ connectDB();
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || origin === allowedOrigin) {
         return callback(null, true);
       }
+      console.error("CORS blocked origin:", origin); // для отладки
       return callback(new Error("Not allowed by CORS"));
     },
-    credentials: true, // если используешь cookie или заголовки авторизации
+    credentials: true,
   })
 );
 app.use(express.json());
