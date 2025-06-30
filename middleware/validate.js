@@ -3,6 +3,7 @@ import * as z from "zod/v4";
 export const validate = (schema) => (req, res, next) => {
   try {
     req.body = schema.parse(req.body);
+
     next();
   } catch (err) {
     if (err instanceof z.ZodError) {

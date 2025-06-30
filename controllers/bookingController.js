@@ -123,6 +123,9 @@ export const createBooking = async (req, res) => {
         .json({ message: "Время занято и разместить бронирование не удастся" });
     }
 
+    // Пользователи, чьи бронирования будут изменены
+    const affectedUsers = new Set();
+
     // Отдельно ищем гибкие конфликты (если такие есть — пробуем решить)
     const flexibleConflicts = existingBookings.filter((b) => {
       const bStart = timeToMinutes(b.startTime);
@@ -142,7 +145,6 @@ export const createBooking = async (req, res) => {
         });
       }
 
-      const affectedUsers = new Set();
       for (const adj of adjustments) {
         const b = await Booking.findById(adj.id);
 
