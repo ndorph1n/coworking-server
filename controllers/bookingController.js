@@ -142,6 +142,7 @@ export const createBooking = async (req, res) => {
         });
       }
 
+      const affectedUsers = new Set();
       for (const adj of adjustments) {
         const b = await Booking.findById(adj.id);
 
@@ -173,6 +174,7 @@ export const createBooking = async (req, res) => {
         }
 
         await b.save();
+        affectedUsers.add(b.user.toString());
       }
     }
 
@@ -203,6 +205,16 @@ export const createBooking = async (req, res) => {
       message: `Бронирование рабочего места "${workspace.name}" успешно оформлено на ${date} с ${startTime} до ${endTime}.`,
       type: "booking",
     });
+
+    for (const userId of affectedUsers) {
+      if (userId !== req.user._id.toString()) {
+        await Notification.create({
+          user: userId,
+          message: `Ваше бронирование рабочего места "${workspace.name}" было скорректировано из-за нового бронирования. Пожалуйста, проверьте актуальное время.`,
+          type: "booking",
+        });
+      }
+    }
 
     res.status(201).json(booking);
   } catch (error) {
